@@ -7,7 +7,15 @@ Binary name: `tavily`.
 
 ## Install
 
-**One-line install (recommended)** — no Go toolchain required:
+**Homebrew (macOS)** — recommended on Mac:
+
+```sh
+brew install sapihav/tap/tavily
+```
+
+The tap auto-installs on first use; subsequent `brew upgrade` picks up new releases.
+
+**One-line install (Linux / macOS)** — no Go toolchain required:
 
 ```sh
 curl -sSL https://raw.githubusercontent.com/sapihav/tavily-cli/main/install.sh | bash
