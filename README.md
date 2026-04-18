@@ -33,22 +33,33 @@ tavily search "golang 1.25 release notes" --max-results 3 --pretty
 
 ### Example output
 
+Every successful invocation emits a single JSON envelope on stdout:
+
 ```json
 {
-  "query": "golang 1.25 release notes",
-  "answer": "",
-  "results": [
-    {
-      "title": "Go 1.25 Release Notes",
-      "url": "https://go.dev/doc/go1.25",
-      "content": "Go 1.25 includes ...",
-      "score": 0.92,
-      "published_date": "2025-08-12"
-    }
-  ],
-  "response_time": 0.41
+  "schema_version": "1",
+  "provider": "tavily",
+  "command": "search",
+  "elapsed_ms": 412,
+  "result": {
+    "query": "golang 1.25 release notes",
+    "answer": "",
+    "results": [
+      {
+        "title": "Go 1.25 Release Notes",
+        "url": "https://go.dev/doc/go1.25",
+        "content": "Go 1.25 includes ...",
+        "score": 0.92,
+        "published_date": "2025-08-12"
+      }
+    ],
+    "response_time": 0.41
+  }
 }
 ```
+
+On error, nothing is written to stdout; a single human-readable line is
+printed to stderr and the process exits with a non-zero code (see below).
 
 ## Flags
 
