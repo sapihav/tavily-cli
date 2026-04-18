@@ -6,10 +6,22 @@ import (
 	"fmt"
 	"io"
 	"os"
+	"time"
 
 	"github.com/sapihav/tavily-cli/internal/client"
 	"github.com/spf13/cobra"
 )
+
+// envelope is the stable stdout shape for every successful CLI invocation.
+// Fields are ordered intentionally: schema_version first so consumers can
+// gate-check before parsing the rest. See CLAUDE.md "Output contract".
+type envelope struct {
+	SchemaVersion string `json:"schema_version"`
+	Provider      string `json:"provider"`
+	Command       string `json:"command"`
+	ElapsedMs     int64  `json:"elapsed_ms"`
+	Result        any    `json:"result"`
+}
 
 // search-specific flags.
 var (
@@ -37,6 +49,7 @@ func init() {
 // runSearch is the Cobra handler. It keeps all IO / exit-code mapping in one
 // place so the client package stays transport-layer only.
 func runSearch(cmd *cobra.Command, args []string) error {
+	start := time.Now()
 	query := args[0]
 
 	if err := validateEnum(searchDepth, "search-depth", "basic", "advanced"); err != nil {
@@ -69,7 +82,13 @@ func runSearch(cmd *cobra.Command, args []string) error {
 		return err
 	}
 
-	return writeJSON(resp)
+	return writeJSON(envelope{
+		SchemaVersion: "1",
+		Provider:      "tavily",
+		Command:       "search",
+		ElapsedMs:     time.Since(start).Milliseconds(),
+		Result:        resp,
+	})
 }
 
 // writeJSON marshals v and routes it to --out (if set) or stdout.
