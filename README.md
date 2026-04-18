@@ -7,6 +7,16 @@ Binary name: `tavily`.
 
 ## Install
 
+**One-line install (recommended)** — no Go toolchain required:
+
+```sh
+curl -sSL https://raw.githubusercontent.com/sapihav/tavily-cli/main/install.sh | bash
+```
+
+Downloads the latest release for your OS/arch, verifies SHA-256, installs `tavily` to `/usr/local/bin`. Override with `INSTALL_DIR=$HOME/.local/bin`. Requires `curl` + `jq`.
+
+**From source** (requires Go 1.25+):
+
 ```sh
 go install github.com/sapihav/tavily-cli@latest
 ```
