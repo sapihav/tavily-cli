@@ -83,12 +83,49 @@ printed to stderr and the process exits with a non-zero code (see below).
 
 ### `tavily search`
 
+Covers the full [Tavily `/search` API surface](https://docs.tavily.com/documentation/api-reference/endpoint/search).
+
+```sh
+tavily search "golang 1.25" --search-depth advanced --topic news --time-range w --pretty
+tavily search "acme earnings" --topic finance --include-answer advanced
+tavily search "llm ops" --include-domain arxiv.org --include-domain openreview.net
+tavily search "berlin" --include-images --include-image-descriptions
+tavily search "climate" --include-raw-content --raw-content-format markdown
+```
+
+**Core**
+
 | Flag | Default | Description |
 |---|---|---|
 | `--max-results N` | `5` | Maximum results returned |
-| `--search-depth` | `basic` | `basic` or `advanced` |
-| `--topic` | `general` | `general` or `news` |
-| `--include-answer` | `false` | Ask Tavily to include a synthesized answer |
+| `--search-depth basic\|advanced\|fast\|ultra-fast` | `basic` | Depth tier |
+| `--topic general\|news\|finance` | `general` | Search topic |
+| `--auto-parameters` | `false` | Let Tavily auto-tune parameters |
+| `--exact-match` | `false` | Require exact-match results |
+| `--safe-search` | `false` | Filter NSFW |
+| `--chunks-per-source N` | `0` | Number of chunks returned per source |
+
+**Filters**
+
+| Flag | Default | Description |
+|---|---|---|
+| `--time-range d\|w\|m\|y` | unset | Relative time window |
+| `--start-date YYYY-MM-DD` | unset | Absolute start date |
+| `--end-date YYYY-MM-DD` | unset | Absolute end date |
+| `--include-domain DOMAIN` | — | Repeatable (≤300 entries) |
+| `--exclude-domain DOMAIN` | — | Repeatable (≤150 entries) |
+| `--country NAME` | unset | Boost results from country (`topic=general` only) |
+
+**Enrichment**
+
+| Flag | Default | Description |
+|---|---|---|
+| `--include-answer basic\|advanced` | unset | Ask for a synthesized answer. Bare flag = `basic`; legacy `--include-answer=true` also maps to `basic` |
+| `--include-images` | `false` | Return image URLs |
+| `--include-image-descriptions` | `false` | Require `--include-images` |
+| `--include-raw-content` | `false` | Return full raw page content |
+| `--raw-content-format markdown\|text` | `markdown` | Raw content format |
+| `--include-favicon` | `false` | Include each result's favicon URL |
 
 ### Global
 
@@ -111,8 +148,9 @@ printed to stderr and the process exits with a non-zero code (see below).
 
 ## Scope
 
-Milestone 1 ships only `tavily search`. `extract`, `crawl`, `map`, and deep
-research are deliberately out of scope for this release.
+Milestone 2 shipped: `tavily search` covers the full `/search` API (topic,
+depth, time/date ranges, domain filters, country, images, raw content,
+chunks, favicon). On the backlog: `extract`, `map`, `crawl`, research.
 
 ## License
 
