@@ -127,6 +127,32 @@ tavily search "climate" --include-raw-content --raw-content-format markdown
 | `--raw-content-format markdown\|text` | `markdown` | Raw content format |
 | `--include-favicon` | `false` | Include each result's favicon URL |
 
+### `tavily extract`
+
+Wraps the [Tavily `/extract` API](https://docs.tavily.com/documentation/api-reference/endpoint/extract).
+URLs can be passed as positional args, comma-separated via `--urls`, or
+newline-separated on stdin (`-`). Duplicates and blanks are dropped; all URLs
+go out in a single batched request.
+
+```sh
+tavily extract https://example.com --pretty
+tavily extract https://a.example https://b.example --extract-depth advanced --format text
+printf "https://x\nhttps://y\n" | tavily extract - --include-images --include-favicon
+tavily extract --urls https://a.example,https://b.example --query "pricing" --include-usage
+```
+
+| Flag | Default | Description |
+|---|---|---|
+| `--urls a,b,c` | unset | Comma-separated list of URLs (in addition to positional args) |
+| `--query STRING` | unset | Focus extraction on this query |
+| `--extract-depth basic\|advanced` | `basic` | Extraction depth tier |
+| `--format markdown\|text` | `markdown` | Output format for `raw_content` |
+| `--chunks-per-source N` | `0` | Max chunks per source, 1-5 (0 = server default) |
+| `--include-images` | `false` | Return image URLs pulled from each page |
+| `--include-favicon` | `false` | Return each source's favicon URL |
+| `--include-usage` | `false` | Include per-request usage accounting |
+| `--timeout SEC` | `60` | Per-request timeout in seconds |
+
 ### Global
 
 | Flag | Default | Description |
@@ -148,9 +174,9 @@ tavily search "climate" --include-raw-content --raw-content-format markdown
 
 ## Scope
 
-Milestone 2 shipped: `tavily search` covers the full `/search` API (topic,
-depth, time/date ranges, domain filters, country, images, raw content,
-chunks, favicon). On the backlog: `extract`, `map`, `crawl`, research.
+Milestones 1–3 shipped: `tavily search` covers the full `/search` API and
+`tavily extract` wraps `/extract` (batched multi-URL, focus query, images,
+favicon, usage). On the backlog: `map`, `crawl`, research.
 
 ## License
 

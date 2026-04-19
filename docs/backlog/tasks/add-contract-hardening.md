@@ -27,3 +27,5 @@ Workspace contract mandates `--dry-run`, `--json-errors`, `--rate-limit`, `--tim
 - Runs in parallel with M2–M5, but must land before `v0.2.0`.
 - Budget: ~300 LoC.
 - Add golden test asserting the bearer token never appears in `--verbose` or `--dry-run` output on any command.
+- **`extract` already declares a local `--timeout`** (shipped in M3). Cobra silently shadows a persistent flag with a local one of the same name — no panic, no warning — so promoting `--timeout` to persistent here MUST be paired with removing the local declaration on `extract`, otherwise the promotion is inert on that command. Verify with an integration test that `tavily extract --timeout 5` observes the persistent default hierarchy after this milestone.
+- Also fix the pre-existing `CLAUDE.md` exit-code taxonomy line (says `1=user, 2=API`, but code + README have always used `1=API, 2=user`). One-line doc fix; bundle with this PR.

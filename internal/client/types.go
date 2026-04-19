@@ -65,3 +65,50 @@ type SearchResponse struct {
 	ResponseTime   float64        `json:"response_time,omitempty"`
 	RequestID      string         `json:"request_id,omitempty"`
 }
+
+// ExtractRequest is the JSON body sent to POST /extract.
+//
+// Fields match the Tavily /extract OpenAPI schema. All optional fields use
+// omitempty so the server applies its documented defaults. URLs is always sent
+// (even singular) so the wire format is stable regardless of arity.
+type ExtractRequest struct {
+	URLs            []string `json:"urls"`
+	Query           string   `json:"query,omitempty"`
+	ExtractDepth    string   `json:"extract_depth,omitempty"`
+	Format          string   `json:"format,omitempty"`
+	ChunksPerSource int      `json:"chunks_per_source,omitempty"`
+	IncludeImages   bool     `json:"include_images,omitempty"`
+	IncludeFavicon  bool     `json:"include_favicon,omitempty"`
+	IncludeUsage    bool     `json:"include_usage,omitempty"`
+	// APIKey is only populated on the body-auth fallback path.
+	APIKey string `json:"api_key,omitempty"`
+}
+
+// ExtractResult is a single successful URL extraction.
+type ExtractResult struct {
+	URL        string   `json:"url"`
+	RawContent string   `json:"raw_content"`
+	Images     []string `json:"images,omitempty"`
+	Favicon    string   `json:"favicon,omitempty"`
+}
+
+// ExtractFailedResult surfaces per-URL failures returned by /extract. Tavily
+// batches these into a sibling array so partial success is first-class.
+type ExtractFailedResult struct {
+	URL   string `json:"url"`
+	Error string `json:"error"`
+}
+
+// ExtractUsage mirrors the optional usage accounting block Tavily returns
+// when include_usage=true. Kept as a loose map to avoid pinning a shape the
+// upstream may extend.
+type ExtractUsage map[string]any
+
+// ExtractResponse mirrors the Tavily /extract response shape.
+type ExtractResponse struct {
+	Results       []ExtractResult       `json:"results"`
+	FailedResults []ExtractFailedResult `json:"failed_results,omitempty"`
+	ResponseTime  float64               `json:"response_time,omitempty"`
+	RequestID     string                `json:"request_id,omitempty"`
+	Usage         ExtractUsage          `json:"usage,omitempty"`
+}

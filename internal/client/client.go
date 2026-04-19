@@ -78,23 +78,49 @@ func New(apiKey string, maxRetries int) *Client {
 // Auth: prefers Authorization: Bearer. On 401 it flips to body api_key and
 // retries once (still within the retry budget).
 func (c *Client) Search(ctx context.Context, req SearchRequest) (*SearchResponse, error) {
+	var out SearchResponse
+	err := c.post(ctx, "/search", &req, &req.APIKey, &out)
+	if err != nil {
+		return nil, err
+	}
+	return &out, nil
+}
+
+// Extract calls POST /extract with a batch of URLs and returns the decoded
+// response. Uses the same retry / auth-fallback policy as Search.
+func (c *Client) Extract(ctx context.Context, req ExtractRequest) (*ExtractResponse, error) {
+	var out ExtractResponse
+	err := c.post(ctx, "/extract", &req, &req.APIKey, &out)
+	if err != nil {
+		return nil, err
+	}
+	return &out, nil
+}
+
+// post runs a POST <path> round-trip with retry, backoff, and 401→body-auth
+// fallback. apiKeyField must point at the request struct's api_key field so
+// body-auth mode can populate it without this helper knowing the request type.
+func (c *Client) post(ctx context.Context, path string, req any, apiKeyField *string, out any) error {
 	if c.APIKey == "" {
-		return nil, ErrMissingAPIKey
+		return ErrMissingAPIKey
 	}
 
 	var lastErr error
-	attempts := c.MaxRetries + 1 // +1 for the initial attempt
+	attempts := c.MaxRetries + 1
 
 	for attempt := 1; attempt <= attempts; attempt++ {
-		resp, err := c.doSearch(ctx, req)
-		if err == nil {
-			return resp, nil
+		if c.UseBodyAuth {
+			*apiKeyField = c.APIKey
+		} else {
+			*apiKeyField = ""
 		}
 
+		err := c.roundTrip(ctx, path, req, out)
+		if err == nil {
+			return nil
+		}
 		lastErr = err
 
-		// 401 on header-based auth: one-shot fallback to body auth, does not
-		// consume the retry budget other than this attempt.
 		var apiErr *APIError
 		if errors.As(err, &apiErr) && apiErr.StatusCode == http.StatusUnauthorized && !c.UseBodyAuth {
 			c.UseBodyAuth = true
@@ -102,41 +128,32 @@ func (c *Client) Search(ctx context.Context, req SearchRequest) (*SearchResponse
 		}
 
 		if !isRetryable(err) {
-			return nil, err
+			return err
 		}
-
 		if attempt == attempts {
 			break
 		}
 
-		// Exponential backoff; respect ctx cancellation.
 		sleep := c.BackoffBase * time.Duration(1<<(attempt-1))
 		select {
 		case <-ctx.Done():
-			return nil, &NetworkError{Err: ctx.Err()}
+			return &NetworkError{Err: ctx.Err()}
 		case <-time.After(sleep):
 		}
 	}
-
-	return nil, lastErr
+	return lastErr
 }
 
-// doSearch performs a single HTTP round-trip. All retry / backoff decisions are
-// made by the caller (Search).
-func (c *Client) doSearch(ctx context.Context, req SearchRequest) (*SearchResponse, error) {
-	body := req
-	if c.UseBodyAuth {
-		body.APIKey = c.APIKey
+// roundTrip performs a single HTTP request/response cycle.
+func (c *Client) roundTrip(ctx context.Context, path string, req any, out any) error {
+	buf, err := json.Marshal(req)
+	if err != nil {
+		return fmt.Errorf("marshal request: %w", err)
 	}
 
-	buf, err := json.Marshal(body)
+	httpReq, err := http.NewRequestWithContext(ctx, http.MethodPost, c.BaseURL+path, bytes.NewReader(buf))
 	if err != nil {
-		return nil, fmt.Errorf("marshal request: %w", err)
-	}
-
-	httpReq, err := http.NewRequestWithContext(ctx, http.MethodPost, c.BaseURL+"/search", bytes.NewReader(buf))
-	if err != nil {
-		return nil, &NetworkError{Err: err}
+		return &NetworkError{Err: err}
 	}
 	httpReq.Header.Set("Content-Type", "application/json")
 	httpReq.Header.Set("Accept", "application/json")
@@ -146,24 +163,23 @@ func (c *Client) doSearch(ctx context.Context, req SearchRequest) (*SearchRespon
 
 	httpResp, err := c.HTTP.Do(httpReq)
 	if err != nil {
-		return nil, &NetworkError{Err: err}
+		return &NetworkError{Err: err}
 	}
 	defer httpResp.Body.Close()
 
 	respBytes, err := io.ReadAll(httpResp.Body)
 	if err != nil {
-		return nil, &NetworkError{Err: err}
+		return &NetworkError{Err: err}
 	}
 
 	if httpResp.StatusCode >= 400 {
-		return nil, &APIError{StatusCode: httpResp.StatusCode, Body: string(respBytes)}
+		return &APIError{StatusCode: httpResp.StatusCode, Body: string(respBytes)}
 	}
 
-	var out SearchResponse
-	if err := json.Unmarshal(respBytes, &out); err != nil {
-		return nil, fmt.Errorf("decode response: %w", err)
+	if err := json.Unmarshal(respBytes, out); err != nil {
+		return fmt.Errorf("decode response: %w", err)
 	}
-	return &out, nil
+	return nil
 }
 
 // isRetryable reports whether err warrants another attempt.
