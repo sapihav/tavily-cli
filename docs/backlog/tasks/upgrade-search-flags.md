@@ -2,7 +2,7 @@
 title: M2 — `search` flag parity with Tavily API
 type: task
 priority: P1
-status: todo
+status: done
 created: 2026-04-18
 ---
 

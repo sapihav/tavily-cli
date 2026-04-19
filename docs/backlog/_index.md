@@ -6,11 +6,10 @@ _(work currently in flight)_
 
 ## Up Next
 
-1. [M2 — `search` flag parity with Tavily API](tasks/upgrade-search-flags.md) — P1
-2. [M3 — `extract` subcommand](tasks/add-extract-subcommand.md) — P1 (MCP `tavily-extract`)
-3. [M4 — `map` subcommand](tasks/add-map-subcommand.md) — P2 (MCP `tavily-map`)
-4. [M5 — `crawl` subcommand](tasks/add-crawl-subcommand.md) — P2 (MCP `tavily-crawl`, depends on M3+M4)
-5. [M6 — contract hardening](tasks/add-contract-hardening.md) — P2 (workspace standard)
+1. [M3 — `extract` subcommand](tasks/add-extract-subcommand.md) — P1 (MCP `tavily-extract`)
+2. [M4 — `map` subcommand](tasks/add-map-subcommand.md) — P2 (MCP `tavily-map`)
+3. [M5 — `crawl` subcommand](tasks/add-crawl-subcommand.md) — P2 (MCP `tavily-crawl`, depends on M3+M4)
+4. [M6 — contract hardening](tasks/add-contract-hardening.md) — P2 (workspace standard)
 
 ## Backlog
 

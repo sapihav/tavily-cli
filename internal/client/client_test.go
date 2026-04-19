@@ -213,6 +213,99 @@ func TestSearch_ContextCancellation(t *testing.T) {
 	// behavior under test is "does not hang".
 }
 
+// TestSearch_ExpandedRequestFields wire-tests the M2 flag expansion. It
+// sends a request exercising every new field and asserts the server-side JSON
+// matches exactly, and that the decoded response surfaces images + raw_content.
+func TestSearch_ExpandedRequestFields(t *testing.T) {
+	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		body, _ := io.ReadAll(r.Body)
+		var got map[string]any
+		if err := json.Unmarshal(body, &got); err != nil {
+			t.Fatalf("decode request: %v", err)
+		}
+		// Spot-check the newly wired fields are present with expected shapes.
+		for k, want := range map[string]any{
+			"topic":                      "finance",
+			"search_depth":               "ultra-fast",
+			"time_range":                 "m",
+			"start_date":                 "2026-01-01",
+			"end_date":                   "2026-03-01",
+			"country":                    "united states",
+			"include_answer":             "advanced",
+			"include_raw_content":        "markdown",
+			"include_images":             true,
+			"include_image_descriptions": true,
+			"include_favicon":            true,
+			"auto_parameters":            true,
+			"exact_match":                true,
+			"safe_search":                true,
+		} {
+			if !equalJSON(got[k], want) {
+				t.Errorf("request field %s = %v, want %v", k, got[k], want)
+			}
+		}
+		if incs, _ := got["include_domains"].([]any); len(incs) != 2 {
+			t.Errorf("include_domains len = %d, want 2", len(incs))
+		}
+		if chunks, _ := got["chunks_per_source"].(float64); chunks != 3 {
+			t.Errorf("chunks_per_source = %v, want 3", chunks)
+		}
+
+		w.Header().Set("Content-Type", "application/json")
+		_, _ = w.Write([]byte(`{
+			"query":"q",
+			"answer":"a",
+			"images":[{"url":"https://i/1.png","description":"d"}],
+			"results":[{"title":"t","url":"u","content":"c","score":0.5,"raw_content":"# x","favicon":"https://f","images":[{"url":"https://i/r.png"}]}],
+			"response_time":0.2,
+			"request_id":"rid"
+		}`))
+	}))
+	defer srv.Close()
+
+	c := newTestClient(t, srv, 0)
+	resp, err := c.Search(context.Background(), SearchRequest{
+		Query:                    "q",
+		Topic:                    "finance",
+		SearchDepth:              "ultra-fast",
+		TimeRange:                "m",
+		StartDate:                "2026-01-01",
+		EndDate:                  "2026-03-01",
+		Country:                  "united states",
+		IncludeAnswer:            "advanced",
+		IncludeRawContent:        "markdown",
+		IncludeImages:            true,
+		IncludeImageDescriptions: true,
+		IncludeFavicon:           true,
+		IncludeDomains:           []string{"a.com", "b.com"},
+		ExcludeDomains:           []string{"x.com"},
+		ChunksPerSource:          3,
+		AutoParameters:           true,
+		ExactMatch:               true,
+		SafeSearch:               true,
+	})
+	if err != nil {
+		t.Fatalf("Search: %v", err)
+	}
+	if len(resp.Images) != 1 || resp.Images[0].URL != "https://i/1.png" {
+		t.Errorf("images not decoded: %+v", resp.Images)
+	}
+	if resp.Results[0].RawContent != "# x" || resp.Results[0].Favicon != "https://f" {
+		t.Errorf("per-result fields not decoded: %+v", resp.Results[0])
+	}
+	if resp.RequestID != "rid" {
+		t.Errorf("request_id = %q, want rid", resp.RequestID)
+	}
+}
+
+// equalJSON compares two decoded JSON values ignoring Go type quirks between
+// json.Unmarshal's map[string]any and our literal expectations.
+func equalJSON(a, b any) bool {
+	ab, _ := json.Marshal(a)
+	bb, _ := json.Marshal(b)
+	return string(ab) == string(bb)
+}
+
 // TestSearch_BadJSON surfaces a decode error distinct from APIError.
 func TestSearch_BadJSON(t *testing.T) {
 	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
