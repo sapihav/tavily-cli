@@ -5,6 +5,10 @@ stdout, progress on stderr. Agent-friendly.
 
 Binary name: `tavily`.
 
+## Parity
+
+`███████████████░░░░░` **75%** — `search`, `extract`, `map` shipped (3 of 4 MCP tools). `crawl` (M5) and `tavily schema` (M6) remain. See [PARITY.md](PARITY.md).
+
 ## Install
 
 **Homebrew (macOS)** — recommended on Mac:
