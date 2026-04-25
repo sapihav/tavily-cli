@@ -112,3 +112,33 @@ type ExtractResponse struct {
 	RequestID     string                `json:"request_id,omitempty"`
 	Usage         ExtractUsage          `json:"usage,omitempty"`
 }
+
+// MapRequest is the JSON body sent to POST /map.
+//
+// Fields match the Tavily /map OpenAPI schema. Optional fields use omitempty
+// so the server applies its documented defaults. AllowExternal is a *bool so
+// the explicit `false` value can be sent over the wire (server default is
+// true; bare bool with omitempty would silently drop it).
+type MapRequest struct {
+	URL            string   `json:"url"`
+	MaxDepth       int      `json:"max_depth,omitempty"`
+	MaxBreadth     int      `json:"max_breadth,omitempty"`
+	Limit          int      `json:"limit,omitempty"`
+	Instructions   string   `json:"instructions,omitempty"`
+	SelectPaths    []string `json:"select_paths,omitempty"`
+	ExcludePaths   []string `json:"exclude_paths,omitempty"`
+	SelectDomains  []string `json:"select_domains,omitempty"`
+	ExcludeDomains []string `json:"exclude_domains,omitempty"`
+	AllowExternal  *bool    `json:"allow_external,omitempty"`
+	// APIKey is only populated on the body-auth fallback path.
+	APIKey string `json:"api_key,omitempty"`
+}
+
+// MapResponse mirrors the Tavily /map response shape. `results` is a flat
+// list of discovered URLs (no per-URL metadata).
+type MapResponse struct {
+	BaseURL      string   `json:"base_url"`
+	Results      []string `json:"results"`
+	ResponseTime float64  `json:"response_time,omitempty"`
+	RequestID    string   `json:"request_id,omitempty"`
+}

@@ -11,7 +11,7 @@ Sources: [docs.tavily.com/documentation/api-reference](https://docs.tavily.com/d
 |---|---|---|---|---|
 | `POST /search` | `tavily-search` | `tavily search` | shipped (M1+M2) | Full Tavily `/search` parity: topic, search-depth (basic/advanced/fast/ultra-fast), include-answer, include-images/-image-descriptions, include-raw-content, raw-content-format, include-favicon, include/exclude-domain, country, time-range, start/end-date, max-results, chunks-per-source, exact-match, auto-parameters, safe-search. |
 | `POST /extract` | `tavily-extract` | `tavily extract` | shipped (M3) | Batched multi-URL; flags: extract-depth, format, include-images, include-favicon, include-usage, query (focus), chunks-per-source, timeout. URLs via args, `--urls`, or stdin `-`. |
-| `POST /map` | `tavily-map` | `tavily map` | planned (M4) | Backlog: `add-map-subcommand.md`, P2. Flags: max-depth, max-breadth, limit, instructions, select/exclude-path, select/exclude-domain, allow-external. |
+| `POST /map` | `tavily-map` | `tavily map` | shipped (M4) | Flags: max-depth, max-breadth, limit, instructions, select/exclude-path (repeatable regex), select/exclude-domain (repeatable regex), allow-external, dry-run, timeout. URL via positional arg or stdin `-`. |
 | `POST /crawl` | `tavily-crawl` | `tavily crawl` | planned (M5) | Backlog: `add-crawl-subcommand.md`, P2, depends on M4. Inherits all map flags + extract flags. |
 | `POST /research` | n/a (not in MCP) | `tavily research` | planned (Ideas) | Backlog `_index.md` Ideas section. Flags sketched: `--model`, `--citation-format`, `--output-schema @file`, `--stream`. Not prioritized. |
 | `GET /research/{request_id}` | n/a | — | planned (Ideas)? | Implied companion to `/research` for async polling. Not explicitly on backlog. |

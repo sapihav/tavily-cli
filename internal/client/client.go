@@ -97,6 +97,17 @@ func (c *Client) Extract(ctx context.Context, req ExtractRequest) (*ExtractRespo
 	return &out, nil
 }
 
+// Map calls POST /map and returns the decoded response. Uses the same retry /
+// auth-fallback policy as Search.
+func (c *Client) Map(ctx context.Context, req MapRequest) (*MapResponse, error) {
+	var out MapResponse
+	err := c.post(ctx, "/map", &req, &req.APIKey, &out)
+	if err != nil {
+		return nil, err
+	}
+	return &out, nil
+}
+
 // post runs a POST <path> round-trip with retry, backoff, and 401→body-auth
 // fallback. apiKeyField must point at the request struct's api_key field so
 // body-auth mode can populate it without this helper knowing the request type.

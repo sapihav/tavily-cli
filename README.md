@@ -153,6 +153,32 @@ tavily extract --urls https://a.example,https://b.example --query "pricing" --in
 | `--include-usage` | `false` | Include per-request usage accounting |
 | `--timeout SEC` | `60` | Per-request timeout in seconds |
 
+### `tavily map`
+
+Wraps the [Tavily `/map` API](https://docs.tavily.com/documentation/api-reference/endpoint/map).
+Given a root URL, returns a flat list of discovered URLs. Pass `-` to read the
+URL from stdin. Path/domain filters take regex patterns and are repeatable.
+
+```sh
+tavily map https://docs.example.com --max-depth 3 --pretty
+tavily map https://x.example --select-path '^/docs/.*' --exclude-path '^/admin/.*'
+echo https://x.example | tavily map - --instructions "focus on the API reference" --dry-run
+```
+
+| Flag | Default | Description |
+|---|---|---|
+| `--max-depth N` | server | Crawl depth from the root, 1-5 |
+| `--max-breadth N` | server | Links followed per page, 1-500 |
+| `--limit N` | server | Total link cap before stopping |
+| `--instructions STRING` | unset | Natural-language guidance for the crawler |
+| `--select-path REGEX` | — | Repeatable; include only matching paths |
+| `--exclude-path REGEX` | — | Repeatable; drop matching paths |
+| `--select-domain REGEX` | — | Repeatable; include only matching domains |
+| `--exclude-domain REGEX` | — | Repeatable; drop matching domains |
+| `--allow-external` | `true` | Follow links to external domains (server default) |
+| `--dry-run` | `false` | Print the planned request body and exit; no network call |
+| `--timeout SEC` | `60` | Per-request timeout in seconds |
+
 ### Global
 
 | Flag | Default | Description |
@@ -174,9 +200,10 @@ tavily extract --urls https://a.example,https://b.example --query "pricing" --in
 
 ## Scope
 
-Milestones 1–3 shipped: `tavily search` covers the full `/search` API and
+Milestones 1–4 shipped: `tavily search` covers the full `/search` API,
 `tavily extract` wraps `/extract` (batched multi-URL, focus query, images,
-favicon, usage). On the backlog: `map`, `crawl`, research.
+favicon, usage), and `tavily map` wraps `/map` (URL graph mapping with
+path/domain regex filters). On the backlog: `crawl`, research.
 
 ## License
 

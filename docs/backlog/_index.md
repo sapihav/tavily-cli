@@ -6,9 +6,8 @@ _(work currently in flight)_
 
 ## Up Next
 
-1. [M4 — `map` subcommand](tasks/add-map-subcommand.md) — P2 (MCP `tavily-map`)
-2. [M5 — `crawl` subcommand](tasks/add-crawl-subcommand.md) — P2 (MCP `tavily-crawl`, depends on M4)
-3. [M6 — contract hardening](tasks/add-contract-hardening.md) — P2 (workspace standard)
+1. [M5 — `crawl` subcommand](tasks/add-crawl-subcommand.md) — P2 (MCP `tavily-crawl`, depends on M4)
+2. [M6 — contract hardening](tasks/add-contract-hardening.md) — P2 (workspace standard)
 
 ## Backlog
 
