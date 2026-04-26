@@ -108,6 +108,17 @@ func (c *Client) Map(ctx context.Context, req MapRequest) (*MapResponse, error) 
 	return &out, nil
 }
 
+// Crawl calls POST /crawl and returns the decoded response. Uses the same
+// retry / auth-fallback policy as Search.
+func (c *Client) Crawl(ctx context.Context, req CrawlRequest) (*CrawlResponse, error) {
+	var out CrawlResponse
+	err := c.post(ctx, "/crawl", &req, &req.APIKey, &out)
+	if err != nil {
+		return nil, err
+	}
+	return &out, nil
+}
+
 // post runs a POST <path> round-trip with retry, backoff, and 401→body-auth
 // fallback. apiKeyField must point at the request struct's api_key field so
 // body-auth mode can populate it without this helper knowing the request type.

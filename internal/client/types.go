@@ -142,3 +142,53 @@ type MapResponse struct {
 	ResponseTime float64  `json:"response_time,omitempty"`
 	RequestID    string   `json:"request_id,omitempty"`
 }
+
+// CrawlRequest is the JSON body sent to POST /crawl.
+//
+// Fields match the Tavily /crawl OpenAPI schema. Optional fields use omitempty
+// so the server applies its documented defaults. AllowExternal is *bool so an
+// explicit `false` survives the wire (server default is true).
+//
+// /crawl is a superset of /map: same traversal flags plus the per-result
+// extraction flags carried over from /extract.
+type CrawlRequest struct {
+	URL             string   `json:"url"`
+	MaxDepth        int      `json:"max_depth,omitempty"`
+	MaxBreadth      int      `json:"max_breadth,omitempty"`
+	Limit           int      `json:"limit,omitempty"`
+	Instructions    string   `json:"instructions,omitempty"`
+	SelectPaths     []string `json:"select_paths,omitempty"`
+	ExcludePaths    []string `json:"exclude_paths,omitempty"`
+	SelectDomains   []string `json:"select_domains,omitempty"`
+	ExcludeDomains  []string `json:"exclude_domains,omitempty"`
+	AllowExternal   *bool    `json:"allow_external,omitempty"`
+	ExtractDepth    string   `json:"extract_depth,omitempty"`
+	Format          string   `json:"format,omitempty"`
+	ChunksPerSource int      `json:"chunks_per_source,omitempty"`
+	IncludeImages   bool     `json:"include_images,omitempty"`
+	IncludeFavicon  bool     `json:"include_favicon,omitempty"`
+	IncludeUsage    bool     `json:"include_usage,omitempty"`
+	// APIKey is only populated on the body-auth fallback path.
+	APIKey string `json:"api_key,omitempty"`
+}
+
+// CrawlResult is a single crawled page in CrawlResponse.Results.
+type CrawlResult struct {
+	URL        string   `json:"url"`
+	RawContent string   `json:"raw_content"`
+	Images     []string `json:"images,omitempty"`
+	Favicon    string   `json:"favicon,omitempty"`
+}
+
+// CrawlUsage mirrors the optional usage block returned when
+// include_usage=true. Loose map so the upstream may extend without breaking.
+type CrawlUsage map[string]any
+
+// CrawlResponse mirrors the Tavily /crawl response shape.
+type CrawlResponse struct {
+	BaseURL      string        `json:"base_url"`
+	Results      []CrawlResult `json:"results"`
+	ResponseTime float64       `json:"response_time,omitempty"`
+	RequestID    string        `json:"request_id,omitempty"`
+	Usage        CrawlUsage    `json:"usage,omitempty"`
+}

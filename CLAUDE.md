@@ -11,7 +11,7 @@ Thin CLI wrapper for the Tavily API (search, deep search, extract) — `tavily` 
 
 ## Status
 
-**M1 + M2 + M3 shipped** — `search` (full `/search` API parity) and `extract` (batched multi-URL `/extract` with focus query, images, favicon, usage). Stack: **Go 1.25.6** + `spf13/cobra` + stdlib `net/http` (overrides ROADMAP §2's Python stack).
+**M1 + M2 + M3 + M4 + M5 shipped** — `search` (full `/search` API parity), `extract` (batched multi-URL `/extract` with focus query, images, favicon, usage), `map` (URL graph mapping with path/domain regex filters), and `crawl` (BFS crawl with per-page extraction — superset of `map`). Stack: **Go 1.25.6** + `spf13/cobra` + stdlib `net/http` (overrides ROADMAP §2's Python stack).
 
 ## Auth
 

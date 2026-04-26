@@ -7,7 +7,7 @@ Binary name: `tavily`.
 
 ## Parity
 
-`███████████████░░░░░` **75%** — `search`, `extract`, `map` shipped (3 of 4 MCP tools). `crawl` (M5) and `tavily schema` (M6) remain. See [PARITY.md](PARITY.md).
+`████████████████████` **100%** — all four MCP tools shipped (`search`, `extract`, `map`, `crawl`). `tavily schema` (M6 — workspace contract) remains. See [PARITY.md](PARITY.md).
 
 ## Install
 
@@ -183,6 +183,38 @@ echo https://x.example | tavily map - --instructions "focus on the API reference
 | `--dry-run` | `false` | Print the planned request body and exit; no network call |
 | `--timeout SEC` | `60` | Per-request timeout in seconds |
 
+### `tavily crawl`
+
+Wraps the [Tavily `/crawl` API](https://docs.tavily.com/documentation/api-reference/endpoint/crawl).
+Superset of `/map`: same traversal flags plus per-page extraction. Pass `-`
+to read the URL from stdin.
+
+```sh
+tavily crawl https://docs.example.com --max-depth 2 --pretty
+tavily crawl https://x.example --select-path '^/docs/.*' --extract-depth advanced
+echo https://x.example | tavily crawl - --instructions "focus on the API reference" --dry-run
+```
+
+| Flag | Default | Description |
+|---|---|---|
+| `--max-depth N` | server | Crawl depth from the root, 1-5 |
+| `--max-breadth N` | server | Links followed per page, 1-500 |
+| `--limit N` | server | Total link cap before stopping |
+| `--instructions STRING` | unset | Natural-language guidance for the crawler |
+| `--select-path REGEX` | — | Repeatable; include only matching paths |
+| `--exclude-path REGEX` | — | Repeatable; drop matching paths |
+| `--select-domain REGEX` | — | Repeatable; include only matching domains |
+| `--exclude-domain REGEX` | — | Repeatable; drop matching domains |
+| `--allow-external` | `true` | Follow links to external domains (server default) |
+| `--extract-depth basic\|advanced` | `basic` | Per-page extraction depth |
+| `--format markdown\|text` | `markdown` | Per-page raw_content format |
+| `--chunks-per-source N` | `0` | Max chunks per source, 1-5 (0 = server default) |
+| `--include-images` | `false` | Return image URLs pulled from each page |
+| `--include-favicon` | `false` | Return each source's favicon URL |
+| `--include-usage` | `false` | Include per-request usage accounting |
+| `--dry-run` | `false` | Print the planned request body and exit; no network call |
+| `--timeout SEC` | `150` | Per-request timeout in seconds (1-150) |
+
 ### Global
 
 | Flag | Default | Description |
@@ -204,10 +236,12 @@ echo https://x.example | tavily map - --instructions "focus on the API reference
 
 ## Scope
 
-Milestones 1–4 shipped: `tavily search` covers the full `/search` API,
+Milestones 1–5 shipped: `tavily search` covers the full `/search` API,
 `tavily extract` wraps `/extract` (batched multi-URL, focus query, images,
-favicon, usage), and `tavily map` wraps `/map` (URL graph mapping with
-path/domain regex filters). On the backlog: `crawl`, research.
+favicon, usage), `tavily map` wraps `/map` (URL graph mapping with
+path/domain regex filters), and `tavily crawl` wraps `/crawl` (BFS crawl
+with per-page extraction). On the backlog: contract hardening (`schema`,
+`--json-errors`, `--rate-limit`), research.
 
 ## License
 
