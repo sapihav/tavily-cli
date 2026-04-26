@@ -2,7 +2,7 @@
 
 Capability mapping across the Tavily HTTP API, the official Tavily MCP server, and the `tavily` CLI.
 
-Last audited: 2026-04-26
+Last audited: 2026-04-26 (published-artifact smoke: brew cask `sapihav/tap/tavily` v0.6.0 — `version`, `--help` pass; `schema` confirmed absent — see M6 below)
 Sources: [docs.tavily.com/documentation/api-reference](https://docs.tavily.com/documentation/api-reference) (+ [llms.txt](https://docs.tavily.com/llms.txt)), [github.com/tavily-ai/tavily-mcp](https://github.com/tavily-ai/tavily-mcp), local `tavily --help` (no `schema` cmd yet — see M6).
 
 ## Matrix
@@ -20,7 +20,7 @@ Sources: [docs.tavily.com/documentation/api-reference](https://docs.tavily.com/d
 | `POST /generate-keys` (enterprise) | n/a | — | n/a | Enterprise key mgmt; out of scope for an agent-facing CLI. |
 | `GET /key-info` (enterprise) | n/a | — | n/a | Enterprise key mgmt; out of scope. |
 | `POST /deactivate-keys` (enterprise) | n/a | — | n/a | Enterprise key mgmt; out of scope. |
-| — | — | `tavily schema` | planned (M6) | Workspace-standard self-describing JSON command tree. Backlog: `add-contract-hardening.md`. |
+| — | — | `tavily schema` | planned (M6) | Workspace-standard self-describing JSON command tree. Backlog: `add-contract-hardening.md`. Re-confirmed absent via published-artifact smoke 2026-04-26 (cask v0.6.0 returns "unknown command"). |
 | — | — | `tavily version` | shipped | Prints CLI version as JSON. |
 | — | — | `tavily completion` | shipped | Cobra-generated shell completion. |
 
